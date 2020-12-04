@@ -4,14 +4,12 @@
  */
 
 % only append if it is an int
-readint(H, T, T) :- \+ number(H), !.
+readint(H, T, T) :- \+ number(H).
 readint(H, T, [H|T]) :- number(H).
 
 % reads all lines of a file
-read_report([]) :- at_end_of_stream.
-read_report([]) :- read_token(H), \+ number(H), !.
-%read_report(L) :- read_token(H), readint(H, T, L), read_report(T).
-read_report([H|T]) :- read_token(H), read_report(T).
+read_report([]) :- at_end_of_stream, !.
+read_report(L) :- read_token(H), readint(H, T, L), read_report(T).
 
 % read all lines into L from file F
 report(L, F) :- see(F), read_report(L), seen.
