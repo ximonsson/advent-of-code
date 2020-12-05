@@ -17,6 +17,7 @@ report(L, F) :- see(F), read_report(L), seen.
 % find the two expenses that add to 2020 and give their product.
 expenses(Z, X, Y, Rep) :- member(X, Rep), member(Y, Rep), X \= Y, X+Y =:= 2020, Z is X*Y.
 
+% find the three expenses that add to 2020 and give their product.
 expenses(Z, X, Y, S, Rep) :-
 	member(X, Rep), member(Y, Rep), member(S, Rep),
 	X \= Y, X \= S, S \= Y,
