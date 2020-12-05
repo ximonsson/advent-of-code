@@ -1,7 +1,7 @@
-/**
- * 01. Repair Report
- * https://adventofcode.com/2020/day/1
- */
+%
+% 01. Repair Report
+% https://adventofcode.com/2020/day/1
+%
 
 % only append if it is an int
 readint(H, T, T) :- \+ number(H).
