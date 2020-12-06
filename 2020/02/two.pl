@@ -4,9 +4,9 @@
 %
 
 % count occurrences in list/string
-count(_, [], 0).
+count(_, [], 0) :- !.
+count(C, [H|T], N) :- count(C, T, N), C \= H.
 count(C, [C|T], N) :- count(C, T, M), N is M + 1.
-count(C, [_|T], N) :- count(C, T, N).
 
 % check if password applies the policy
 policy(Min, Max, Ch, Pwd) :- count(Ch, Pwd, N), N =< Max, N >= Min.
@@ -20,19 +20,29 @@ read_pwd(Min, Max, C, Pwd) :-
 	get0(_),
 	get0(C),
 	read_token(_),
-	read_token(Pwd).
+	read_token(P),
+	atom_codes(P, Pwd),
+	get_code(_). % newline
 
-write_pwd(Min, Max, C, Pwd) :- write(Min), write('-'), write(Max), write(' '), write(C), write(': '), write(Pwd), nl.
+write_pwd(Min, Max, C, P) :-
+	write(Min),
+	write('-'),
+	write(Max),
+	write(' '),
+	write(C),
+	write(': '),
+	atom_codes(Pwd, P),
+	write(Pwd).
 
-valid_pwd(end_of_file, _, _, _, _).
-valid_pwd(Min, Max, C, Pwd, 0) :- \+ policy(Min, Max, C, Pwd), write_pwd(Min, Max, C, Pwd).
-valid_pwd(Min, Max, C, Pwd, 1) :- policy(Min, Max, C, Pwd).
+validate(Min, Max, C, P, 1) :- policy(Min, Max, C, P).
+validate(_, _, _, _, 0).
 
-% read a password and policy and add if valid
-valid_pwd(0) :- at_end_of_stream, !.
+% read a password and policy recursively, summing the valid ones.
+valid_pwd(0) :- peek_code(C), C =:= -1, !.
 valid_pwd(N) :-
 	read_pwd(Min, Max, C, Pwd),
-	valid_pwd(Min, Max, C, Pwd, N),
-	valid_pwd(M), N is M + N.
+	valid_pwd(M),
+	validate(Min, Max, C, Pwd, X),
+	N is M + X.
 
-main :- see('input'), valid_pwd(N), write(N), nl, seen.
+main :- see('input'), valid_pwd(N), write(N), seen.
