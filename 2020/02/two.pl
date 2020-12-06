@@ -17,11 +17,12 @@ read_pwd(Min, Max, C, Pwd) :-
 	read_token(Min),
 	read_token(_),
 	read_token(Max),
-	read_token(C),
+	get0(_),
+	get0(C),
 	read_token(_),
 	read_token(Pwd).
 
-write_pwd(Min, Max, C, Pwd) :- write(Min), write('-'), write(Max), write(' '), write(C), write(':'), write(Pwd), nl.
+write_pwd(Min, Max, C, Pwd) :- write(Min), write('-'), write(Max), write(' '), write(C), write(': '), write(Pwd), nl.
 
 valid_pwd(end_of_file, _, _, _, _).
 valid_pwd(Min, Max, C, Pwd, 0) :- \+ policy(Min, Max, C, Pwd), write_pwd(Min, Max, C, Pwd).
