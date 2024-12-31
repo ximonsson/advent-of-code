@@ -1,28 +1,13 @@
 % https://adventofcode.com/2024/day/2
 
-% read file
-
-read_input([]) :- at_end_of_stream, !.
-read_input([H|T]) :- get_char(H), read_input(T).
-read_input(F, In) :- see(F), read_input(In), seen.
-
-
 % grammar for parsing
 
 reports([]) --> [].
 reports([R|Rs]) --> levels(R), ['\n'], reports(Rs).
 
 levels([]) --> [].
-levels([L|Ls]) --> level(L), [' '], levels(Ls).
-levels([L|[]]) --> level(L).
-
-level(L) --> digit(D0), digits(D), { number_chars(L, [D0|D]) }.
-
-digits([]) --> [].
-digits([D|T]) --> digit(D), !, digits(T).
-
-digit(D) --> [D], { char_code(D, C), between(48, 57, C) }.
-
+levels([L|Ls]) --> integer(L), [' '], levels(Ls).
+levels([L|[]]) --> integer(L).
 
 % valid report
 
@@ -42,7 +27,7 @@ filter_reports([R|Rs], Vs) :- \+ valid(R), filter_reports(Rs, Vs).
 
 % part one
 
-partone(F, N) :- read_input(F, Data), reports(Rs, Data, []), filter_reports(Rs, Vs), length(Vs, N).
+partone(F, N) :- phrase_from_file(reports(Rs), F), filter_reports(Rs, Vs), length(Vs, N).
 
 
 % dampener
