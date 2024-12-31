@@ -47,13 +47,16 @@ partone(F, N) :- read_input(F, Data), reports(Rs, Data, []), filter_reports(Rs, 
 
 % dampener
 
-damp(H, _, T) :- append(H, T, R), valid(R), !.
-damp(H0, X, [H|T]) :- append(H0, [H|T], R), \+ valid(R), append(H0, [X], H1), damp(H1, H, T).
-damp([H|T]) :- damp([], H, T).
+% old implementation, which is not so elegant.
+damp_(H, _, T) :- append(H, T, R), valid(R), !.
+damp_(H0, X, [H|T]) :- append(H0, [H|T], R), \+ valid(R), append(H0, [X], H1), damp_(H1, H, T).
+damp_([H|T]) :- damp_([], H, T).
+
+damp(R, X) :- member(X, R), select(X, R, R1), valid(R1).
 
 filter_damp_reports([], []) :- !.
 filter_damp_reports([R|Rs], [R|Vs]) :- valid(R), filter_damp_reports(Rs, Vs).
-filter_damp_reports([R|Rs], [R|Vs]) :- \+ valid(R), damp(R), filter_damp_reports(Rs, Vs).
+filter_damp_reports([R|Rs], [R|Vs]) :- \+ valid(R), damp(R, _), filter_damp_reports(Rs, Vs).
 filter_damp_reports([_|Rs], Vs) :- filter_damp_reports(Rs, Vs).
 
 parttwo(F, N) :- read_input(F, Data), reports(Rs, Data, []), filter_damp_reports(Rs, Vs), length(Vs, N).
