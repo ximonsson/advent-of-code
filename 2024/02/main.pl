@@ -3,10 +3,10 @@
 % grammar for parsing
 
 reports([]) --> [].
-reports([R|Rs]) --> levels(R), ['\n'], reports(Rs).
+reports([R|Rs]) --> levels(R), "\n", reports(Rs).
 
 levels([]) --> [].
-levels([L|Ls]) --> integer(L), [' '], levels(Ls).
+levels([L|Ls]) --> integer(L), " ", levels(Ls).
 levels([L|[]]) --> integer(L).
 
 % valid report
