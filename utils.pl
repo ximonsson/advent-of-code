@@ -26,3 +26,15 @@ read_input(F, In) :- see(F), read_input(In), seen.
 % apply phrase on file content
 
 phrase_from_file(Ph, F) :- read_input(F, Chars), phrase(Ph, Chars).
+
+% Lists
+% ---
+% Some helpers for lists
+
+% include items from list that satisfy Goal.
+include(_, [], []).
+include(Goal, [H|T], I) :- ( call(Goal, H) -> I = [H|I1]; I = I1 ), include(Goal, T, I1).
+
+% exclude items that do not satisfy Goal.
+exclude(_, [], []).
+exclude(Goal, [H|T], I) :- ( call(Goal, H) -> I = I1; I = [H|I1] ), exclude(Goal, T, I1).
