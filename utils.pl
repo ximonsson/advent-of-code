@@ -18,6 +18,7 @@ digit(D) --> [D], { between(48, 57, D) }.
 % ---
 
 % read file content as list of chars
+%read_input(X) :- get_code(C), ( =/=(C, 10) -> X = [C|T]; X = T ), read_input(T).
 
 read_input([]) :- at_end_of_stream, !.
 read_input([H|T]) :- get_code(H), read_input(T).
