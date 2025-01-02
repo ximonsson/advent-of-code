@@ -15,6 +15,11 @@ lines([]) --> [].
 line([]) --> [].
 line([H|T]) --> [H], line(T).
 
+
+% vertical
+
+vert([A|T0], [B|T1], [C|T2], [D|T3], Acc, N) :- [A,B,C,D] == "XMAS".
+
 % TODO transpose
 %
 % TODO diagonal
