@@ -27,6 +27,7 @@ read_input(F, In) :- see(F), read_input(In), seen.
 % apply phrase on file content
 
 phrase_from_file(Ph, F) :- read_input(F, Chars), phrase(Ph, Chars).
+phrase_from_file(Ph, F, Rest) :- read_input(F, Chars), phrase(Ph, Chars, Rest).
 
 % Lists
 % ---
