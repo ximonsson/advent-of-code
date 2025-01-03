@@ -15,21 +15,24 @@ lines([]) --> [].
 line([]) --> [].
 line([H|T]) --> [H], line(T).
 
-
-% vertical
-
-vert([], [], [], [], _, _).
-vert([A|T0], [B|T1], [C|T2], [D|T3], Acc, N1) :-
-	[A,B,C,D] == "XMAS", N is Acc + 1, vert(T0, T1, T2, T3, N, N1).
-
-% TODO transpose
-%
 % TODO diagonal
 
 % solution part one
 
-ceres_search(Data, N) :-
-	phrase(xmas(0, X), Data),  % normal reading order
-	reverse(Data, Atad), phrase(xmas(0, Y), Atad),  % reversed
+ceres_search(F, N) :- read_input(F, Data),
+	% normal reading order
+	phrase(xmas(0, X), Data),
+	% reversed
+	reverse(Data, Atad),
+	phrase(xmas(0, Y), Atad),
+	% vertical
 	phrase(lines(Ls), Data),
-	N is X + Y.
+	transpose(Ls, Lt),
+	flatten(Lt, DataT),
+	phrase(xmas(0, Z), DataT),
+	% vertical reversed
+	reverse(DataT, AtadT),
+	phrase(xmas(0, V), AtadT),
+	% diagonal...
+
+	N is X + Y + Z + V.
