@@ -15,7 +15,7 @@ lines([]) --> [].
 line([]) --> [].
 line([H|T]) --> [H], line(T).
 
-% TODO diagonal
+diag([A|T0], [_, B|T1], [_, _, C|T2], [_, _, _, D|T3]).
 
 % solution part one
 
