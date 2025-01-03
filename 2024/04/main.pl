@@ -18,7 +18,9 @@ line([H|T]) --> [H], line(T).
 
 % vertical
 
-vert([A|T0], [B|T1], [C|T2], [D|T3], Acc, N) :- [A,B,C,D] == "XMAS".
+vert([], [], [], [], _, _).
+vert([A|T0], [B|T1], [C|T2], [D|T3], Acc, N1) :-
+	[A,B,C,D] == "XMAS", N is Acc + 1, vert(T0, T1, T2, T3, N, N1).
 
 % TODO transpose
 %

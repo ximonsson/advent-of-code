@@ -40,3 +40,16 @@ include(Goal, [H|T], I) :- ( call(Goal, H) -> I = [H|I1]; I = I1 ), include(Goal
 % exclude items that do not satisfy Goal.
 exclude(_, [], []).
 exclude(Goal, [H|T], I) :- ( call(Goal, H) -> I = I1; I = [H|I1] ), exclude(Goal, T, I1).
+
+% diff
+diff(L, []) :- length(L, 1).
+diff([H0, H1|T0], [H2|T2]) :- H2 is H1 - H0, diff([H1|T0], T2).
+
+% apply function
+apply(_, [], []).
+apply(P, [H|T], [H1|T1]) :- call(P, H, H1), apply(P, T, T1).
+
+% all same
+all([H|T], H) :- all(T, H).
+all([], _).
+all([H|T]) :- all(T, H).
