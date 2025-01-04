@@ -1,10 +1,12 @@
 
 % find pattern
 
-ignore --> [_], ignore.
 ignore --> [].
+ignore --> [_], ignore.
 
-match(Pattern) --> ignore, Pattern, ignore.
+rest(L, L, []).
+
+match(Pattern) --> ignore, string(Pattern), rest(_).
 
 % all same
 
