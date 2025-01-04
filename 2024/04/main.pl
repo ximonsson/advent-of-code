@@ -1,11 +1,13 @@
 % Day 04
 % https://adventofcode.com/2024/day/4
+% --
+% NOTE this is where I switch to SWI prolog for convenience.
+
+:- [utils].
 
 % count XMAS
 
-xmas(N0, N) --> "XMAS", { N1 is N0 + 1 }, !, xmas(N1, N).
-xmas(Acc, N) --> [_], xmas(Acc, N).
-xmas(N, N) --> [].
+xmas(X, N) :- findall(_, phrase(match("XMAS"), X), Y), length(Y, N).
 
 % read as lines so we can read vertically
 
@@ -15,24 +17,25 @@ lines([]) --> [].
 line([]) --> [].
 line([H|T]) --> [H], line(T).
 
-diag([A|T0], [_, B|T1], [_, _, C|T2], [_, _, _, D|T3]).
+diag([[A|_], [_, B|_], [_, _, C|_], [_, _, _, D|_]]) :-  [A, B, C, D] == "XMAS".
+diag([[_|T0], [_|T1], [_|T2], [_|T3]]) :- diag([T0, T1, T2, T3]).
 
 % solution part one
 
-ceres_search(F, N) :- read_input(F, Data),
+ceres_search(F, N) :- read_file_to_codes(F, Data, [access(read)]),
 	% normal reading order
-	phrase(xmas(0, X), Data),
+	xmas(Data, X0),
 	% reversed
 	reverse(Data, Atad),
-	phrase(xmas(0, Y), Atad),
+	xmas(Atad, X1),
 	% vertical
 	phrase(lines(Ls), Data),
 	transpose(Ls, Lt),
 	flatten(Lt, DataT),
-	phrase(xmas(0, Z), DataT),
+	xmas(DataT, X2),
 	% vertical reversed
 	reverse(DataT, AtadT),
-	phrase(xmas(0, V), AtadT),
+	xmas(AtadT, X3),
 	% diagonal...
 
-	N is X + Y + Z + V.
+	N is X0 + X1 + X2 + X3.
