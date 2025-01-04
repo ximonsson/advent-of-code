@@ -17,8 +17,11 @@ lines([]) --> [].
 line([]) --> [].
 line([H|T]) --> [H], line(T).
 
-diag([[A|_], [_, B|_], [_, _, C|_], [_, _, _, D|_]]) :-  [A, B, C, D] == "XMAS".
-diag([[_|T0], [_|T1], [_|T2], [_|T3]]) :- diag([T0, T1, T2, T3]).
+diag_([[A|_], [_, B|_], [_, _, C|_], [_, _, _, D|_]]) :-  [A, B, C, D] == "XMAS".
+diag_([[_|T0], [_|T1], [_|T2], [_|T3]]) :- diag_([T0, T1, T2, T3]).
+
+diag([L1, L2, L3, L4|_]) :- diag_([L1, L2, L3, L4]).
+diag([_, L2, L3, L4|T]) :- diag([L2, L3, L4|T]).
 
 % solution part one
 
@@ -37,5 +40,7 @@ ceres_search(F, N) :- read_file_to_codes(F, Data, [access(read)]),
 	reverse(DataT, AtadT),
 	xmas(AtadT, X3),
 	% diagonal...
+	findall(_, diag(Data), Dia), length(Dia, X4),
+	findall(_, diag(Atad), DiaR), length(DiaR, X5),
 
-	N is X0 + X1 + X2 + X3.
+	N is X0 + X1 + X2 + X3 + X4 + X5.
