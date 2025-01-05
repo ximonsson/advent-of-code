@@ -4,48 +4,42 @@
 % NOTE this is where I switch to SWI prolog for convenience.
 
 :- [utils].
-:- use_module(library(dcg/basics)).
-
-match2(Pattern) -->
-	string(_),
-	string(Pattern),
-	remainder(_).
 
 % count XMAS
 
 xmas(X, N) :- findall(_, phrase(match("XMAS"), X), Y), length(Y, N).
 samx(X, N) :- findall(_, phrase(match("SAMX"), X), Y), length(Y, N).
 
-% read as lines so we can read vertically
+% diagonal
 
-lines([L|Ls]) --> line(L), "\n", !, lines(Ls).
-lines([]) --> [].
+% diagonal upper left down right
+diag_([[A|_], [_, B|_], [_, _, C|_], [_, _, _, D|_]]) :-
+	[A, B, C, D] == "XMAS"; [A, B, C, D] == "SAMX".
 
-line([]) --> [].
-line([H|T]) --> [H], line(T).
+% diagonal upper right down left
+diag_([[_, _, _, A|_], [_, _, B, _|_], [_, C, _, _|_], [D|_]]) :-
+	[A, B, C, D] == "XMAS"; [A, B, C, D] == "SAMX".
 
-diag_([[A|_], [_, B|_], [_, _, C|_], [_, _, _, D|_]]) :- [A, B, C, D] == "XMAS"; [A, B, C, D] == "SAMX".
-diag_([[_, _, _, A|_], [_, _, B, _|_], [_, C, _, _|_], [D|_]]) :- [A, B, C, D] == "XMAS"; [A, B, C, D] == "SAMX".
+% continue the current rows one token to the right
 diag_([[_|T0], [_|T1], [_|T2], [_|T3]]) :- diag_([T0, T1, T2, T3]).
 
+% scroll through lines
 diag([L1, L2, L3, L4|_]) :- diag_([L1, L2, L3, L4]).
 diag([_|T]) :- diag(T).
+
+add_nl(L, L1) :- append(L, "\n", L1).
 
 % solution part one
 
 ceres_search(F, N) :- read_file_to_codes(F, Data, [access(read)]),
 %reverse(Data, Atad),
 	phrase(lines(Ls), Data),
-	% normal reading order
-	xmas(Data, X0),
-	% reversed
-	samx(Data, X1),
+	% horizontal
+	xmas(Data, X0), samx(Data, X1),
 	% vertical
 	transpose(Ls, Lt),
-	flatten(Lt, DataT),
-	xmas(DataT, X2),
-	% vertical reversed
-	samx(DataT, X3),
+	apply(add_nl, Lt, Lt1), flatten(Lt1, DataT), % add newline to not mess with grammar
+	xmas(DataT, X2), samx(DataT, X3),
 	% diagonal...
 	findall(_, diag(Ls), Dia), length(Dia, X4),
 

@@ -8,6 +8,14 @@ rest(L, L, []).
 
 match(Pattern) --> ignore, string(Pattern), rest(_).
 
+% lines
+
+lines([L|Ls]) --> line(L), "\n", !, lines(Ls).
+lines([]) --> [].
+
+line([]) --> [].
+line([H|T]) --> [H], line(T).
+
 % all same
 
 all([], _).
