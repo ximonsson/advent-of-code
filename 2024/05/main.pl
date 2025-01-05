@@ -51,10 +51,39 @@ print_queue(F, N) :-
 % part II
 % ---
 
+% is rule relevant for the update?
 update_rule(U, rule(A, B)) :- memberchk(A, U), memberchk(B, U).
+
+rules_pages([], []).
+rules_pages([rule(A, B)|Rs], Ps) :- rules_pages(Rs, X), append([A, B], X, Ps).
 
 % elegant but very slow...
 make_correct(Rs, U, Up) :- permutation(U, Up), correct_order(Rs, Up).
+
+make_correct_(Rs_, U, Uc) :-
+	% get rules that apply to this update
+	include(update_rule(U), Rs_, Rs),
+	% get rules that it fails on, and the ones that it respects
+	exclude(respect_rule(U), Rs, Rx), include(respect_rule(U), Rs, Ri),
+
+	% pages for the respective set of rules
+	rules_pages(Rx, Px), rules_pages(Ri, Pi),
+	list_to_set(Px, Psx), list_to_set(Pi, Psi),
+
+	writeln(Psx),
+	writeln(Psi),
+
+	% make a permutation of the update that keeps the sequence of pages
+	% for the rules that it respects and re-orders the pages it fails on.
+	permutation(Psx, Psxc), correct_order(Rx, Psxc),
+
+	writeln(Psxc),
+
+	permutation(U, Uc),
+	subseq(Uc, Psxc, _),
+	subseq(Uc, Psi, _),
+	correct_order(Rs, Uc).
+
 
 print_queue_2(F, N) :-
 	phrase_from_file(inputfile(Rs, Us), F),
