@@ -31,6 +31,16 @@ head([H|_], H).
 tail([], []).
 tail([_|T], T).
 
+% take
+
+take(0, _, []).
+take(N, [H|T0], [H|T1]) :- N1 is N - 1, take(N1, T0, T1).
+
+% drop
+
+drop(0, L, L).
+drop(N, [_|T0], T1) :- N1 is N - 1, drop(N1, T0, T1).
+
 % apply function
 
 apply(_, [], []).
