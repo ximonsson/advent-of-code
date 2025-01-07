@@ -86,3 +86,25 @@ init(Map, Map1, Row) :- guard_up(Map, Map1), guard_row(Map1, 0, Row).
 
 guard_gallivant(F, N) :-
 	read_file_to_codes(F, M, []), init(M, Map, Row), patrol(Map, Row, 0, N).
+
+
+
+
+
+
+% --------------------
+
+outside(M) :- \+ memberchk(62, M).
+
+loop --> ignore, ">", ignore, "X#", rest(_).
+
+walk2(M) --> string(Pre), ">", string(Path), "#", rest(Rest),
+	{ length(Path, N), repeate(N, 88, PathX), append([Pre, PathX, ">#", Rest], M) }.
+
+walk2(M) --> string(Pre), ">", string(Path), "\n", rest(Rest),
+	{ length(Path, N), repeate(N, 88, PathX), append([Pre, PathX, "X\n", Rest], M) }.
+
+rot(M, M1) :- phrase(lines(Ls), M), rotate_map_c(Ls, Ls0), apply(appendnl, Ls0, Ls1), flatten(Ls1, M1).
+
+patrol2(M, N) :- outside(M), findall(_, phrase(match("X"), M), X), length(X, N).
+patrol2(M, N) :- phrase(walk2(M1), M), patrol2(M1, N).
