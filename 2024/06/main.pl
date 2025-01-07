@@ -41,9 +41,11 @@ step([H|T]) --> [H], step(T).
 % patrol the map
 patrol(M, Row, Acc, N) :-
 	% get current line and find which column the guard is on
-	nth0(Row, M, L), nth0(Col, L, 62),
-	%writeln(Row), writeln(Col),
+	nth0(Row, M, L),
 	%string_codes(S_, L), writeln(S_),
+
+	nth0(Col, L, 62),
+	%writeln(Row), writeln(Col),
 
 	% guard walks
 	phrase(walk(N0, Out), L), Acc0 is Acc + N0,
@@ -71,18 +73,11 @@ patrol(M, Row, Acc, N) :-
 	).
 
 % which row is the guard on?
-%guard_row(R, R) --> ignore, ">", rest(_).
-%guard_row(R, R) --> ignore, "<", rest(_).
-%guard_row(R, R) --> ignore, "v", rest(_).
-guard_row(R, R) --> ignore, "^", rest(_).
-guard_row(Acc, R) --> ignore, "\n", { Acc0 is Acc + 1 }, guard_row(Acc0, R).
-
-guard_row([L|_], Row, Row) :- memberchk(94, L).
+guard_row([L|_], Row, Row) :- memberchk(62, L).
 guard_row([_|Map], Acc, Row) :- Acc0 is Acc + 1, guard_row(Map, Acc0, Row).
 
-
 % guard is facing up
-% - fix map by rotating left.
+% - fix map by rotating counter clockwise and replace character for guard.
 guard_up(Map, Map1) :-
 	memberchk(94, Map), select(94, Map, 62, M2), phrase(lines(M3), M2), rotate_map_cc(M3, Map1).
 
@@ -90,4 +85,4 @@ guard_up(Map, Map1) :-
 init(Map, Map1, Row) :- guard_up(Map, Map1), guard_row(Map1, 0, Row).
 
 guard_gallivant(F, N) :-
-	read_file_to_codes(F, M, []), init(M, Map, Row), print_map(Map), writeln(Row), patrol(Map, Row, 0, N).
+	read_file_to_codes(F, M, []), init(M, Map, Row), patrol(Map, Row, 0, N).
