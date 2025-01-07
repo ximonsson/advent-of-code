@@ -1,4 +1,7 @@
 
+:- set_prolog_flag(double_quotes, codes).
+:- use_module(library(dcg/basics)).
+
 % find pattern
 
 ignore --> [].
@@ -45,6 +48,22 @@ drop(N, [_|T0], T1) :- N1 is N - 1, drop(N1, T0, T1).
 
 apply(_, [], []).
 apply(P, [H|T], [H1|T1]) :- call(P, H, H1), apply(P, T, T1).
+
+% repeat element to make list
+
+repeate(0, _, []).
+repeate(N, E, [E|T]) :- N > 0, N0 is N - 1, repeate(N0, E, T).
+
+% replace at index
+
+replace0(I, E, L, L0) :- take(I, L, H), drop(I + 1, L, T), append(H, [E|T], L0).
+% replace in range
+replace0(I0, I1, E, X, Y) :-
+	take(I0, X, X0),
+	drop(I1, X, X1),
+	N is I1 - I0,
+	repeate(N, E, Es),
+	append([X0, Es, X1], Y).
 
 % transpose
 % OBS not making sure all lists are the same length.
