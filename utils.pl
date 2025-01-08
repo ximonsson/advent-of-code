@@ -69,6 +69,9 @@ replace0(I0, I1, E, X, Y) :-
 % OBS not making sure all lists are the same length.
 % TODO should try and do this using `foldl`.
 
-transpose([H|_], []) :- length(H, 0).
-transpose(Ls, [T|Ts]) :- apply(head, Ls, T), apply(tail, Ls, Ts0), transpose(Ts0, Ts).
+%transpose([H|_], []) :- length(H, 0).
+%transpose(Ls, [T|Ts]) :- apply(head, Ls, T), apply(tail, Ls, Ts0), transpose(Ts0, Ts).
 
+replace_all(_, _, [], []).
+replace_all(E, Enew, [E|T0], [Enew|T1]) :- replace_all(E, Enew, T0, T1).
+replace_all(E, Enew, [H|T0], [H|T1]) :- E \== H, replace_all(E, Enew, T0, T1).

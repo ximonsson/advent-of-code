@@ -18,93 +18,62 @@
 % -----------
 
 :- [utils].
+:- use_module(library(clpfd)).
 
-appendnl(L, L0) :- append(L, "\n", L0).
-print_map(M) :- apply(appendnl, M, M0), flatten(M0, M1), string_codes(M2, M1), writeln(M2).
+
+map_codes_list(M, Ls) :- phrase(lines(Ls), M).
 
 flip_map(M, M0) :- apply(reverse, M, M0).
-rotate_map_cc(M, M0) :- transpose(M, M1), flip_map(M1, M0).
-rotate_map_c(M, M0) :- transpose(M, M1), reverse(M1, M0).
 
-map_width(M, W) :- head(M, L), length(L, W).
+rotcc(M, M1) :-
+	map_codes_list(M, Ls), reverse(Ls, Ls0), transpose(Ls0, Ls1), map_codes_list(M1, Ls1).
 
-nlocs(M, N) :- flatten(M, M1), findall(_, phrase(match("X"), M1), X), length(X, N0), N is N0 + 1.
+rotc(M, M1) :-
+	map_codes_list(M, Ls), transpose(Ls, Ls0), reverse(Ls0, Ls1), map_codes_list(M1, Ls1).
 
-% For simplicity we only handle going right. Rotating the board when an obstacle is hit.
+% we are in a loop when the entire path has been walked already.
 
-walk(N, false) --> ignore, ">", step(X), "#", ignore, { length(X, N) }.
-walk(N, true) --> ignore, ">", step(X), { length(X, N) }. % out of map
+obstacle("\n") --> "\n".
+obstacle("#") --> "#".
+obstacle("O") --> "O".
 
-step([]) --> [].
-step([H|T]) --> [H], step(T).
+loop --> ignore, ">", string([Step|Steps]), obstacle(_), rest(_), { Step is 88, all([Step|Steps]) }.
 
-% patrol the map
-patrol(M, Row, Acc, N) :-
-	% get current line and find which column the guard is on
-	nth0(Row, M, L),
-	%string_codes(S_, L), writeln(S_),
+walk(M) --> string(Pre), ">", string(Path), obstacle(O), !, rest(Rest),
+	{
+		length(Path, N),
+		repeate(N, 88, PathX),
+		( O == "\n" -> Icon = "X"; Icon = ">" ),
+		append([Pre, PathX, Icon, O, Rest], M)
+	}.
 
-	nth0(Col, L, 62),
-	%writeln(Row), writeln(Col),
-
-	% guard walks
-	phrase(walk(N0, Out), L), Acc0 is Acc + N0,
-	%writeln(N0),
-
-	% move guard
-	% - replace the line with the guard moved forward
-	replace0(Col, Col + N0, 88, L, L0),
-	replace0(Col + N0, 62, L0, L1),
-	replace0(Row, L1, M, M1),
-
-	%string_codes(S, "walked ----"), write(S), write(' '), writeln(N0), print_map(M1),
-
-	% is the guard ?
-	% - yes: return
-	% - no: rotate map & patrol more
-	(
-		Out -> nlocs(M1, N) ;
-		(
-			rotate_map_c(M1, M2),
-			map_width(M2, W),
-			Row0 is W - Col - N0 - 1,  % new row
-			%print_map(M2),
-			patrol(M2, Row0, Acc0, N))
-	).
-
-% which row is the guard on?
-guard_row([L|_], Row, Row) :- memberchk(62, L).
-guard_row([_|Map], Acc, Row) :- Acc0 is Acc + 1, guard_row(Map, Acc0, Row).
-
-% guard is facing up
-% - fix map by rotating counter clockwise and replace character for guard.
-guard_up(Map, Map1) :-
-	memberchk(94, Map), select(94, Map, 62, M2), phrase(lines(M3), M2), rotate_map_cc(M3, Map1).
-
-% initialize map by rotating/flipping based on direction of the guard.
-init(Map, Map1, Row) :- guard_up(Map, Map1), guard_row(Map1, 0, Row).
-
-guard_gallivant(F, N) :-
-	read_file_to_codes(F, M, []), init(M, Map, Row), patrol(Map, Row, 0, N).
-
-
-
-
-
-
-% --------------------
-
+% guard is outside if we find it right before a newline (where it exited).
 outside(M) :- \+ memberchk(62, M).
 
-loop --> ignore, ">", ignore, "X#", rest(_).
+write_map(M) :- string_codes(S, M), writeln(S).
 
-walk2(M) --> string(Pre), ">", string(Path), "#", rest(Rest),
-	{ length(Path, N), repeate(N, 88, PathX), append([Pre, PathX, ">#", Rest], M) }.
+% we are in a loop
+patrol(M, 0, true, M) :- phrase(loop, M), !.
 
-walk2(M) --> string(Pre), ">", string(Path), "\n", rest(Rest),
-	{ length(Path, N), repeate(N, 88, PathX), append([Pre, PathX, "X\n", Rest], M) }.
+% guard is not on the map, i.e. walked out
+patrol(M, N, false, M) :- outside(M), findall(_, phrase(match("X"), M), X), length(X, N).
 
-rot(M, M1) :- phrase(lines(Ls), M), rotate_map_c(Ls, Ls0), apply(appendnl, Ls0, Ls1), flatten(Ls1, M1).
+% guard walks
+patrol(Map, N, Loop, Solution) :- phrase(walk(M1), Map), rotc(M1, M2), patrol(M2, N, Loop, Solution).
 
-patrol2(M, N) :- outside(M), findall(_, phrase(match("X"), M), X), length(X, N).
-patrol2(M, N) :- phrase(walk2(M1), M), rot(M1, M2), patrol2(M2, N).
+make_loop(M, Ml) :-
+	% first solve the puzzle. then only try putting obstacles in the path of the guard.
+	patrol(M, _, false, M1), replace_all(88, 120, M1, M2),
+
+	% TODO
+	% place the guard in its original position.
+
+	% add the obstacle and try to solve and see if the guard gets into a loop.
+	char_code('O', C), select(120, M2, C, M0), patrol(M0, 0, true, Ml).
+
+init(M, M1) :- select(94, M, 62, M0), rotcc(M0, M1).
+
+guard_gallivant(F, N) :- read_file_to_codes(F, M, []), init(M, Map), patrol(Map, N, false, M2), write_map(M2).
+
+guard_gallivant_2(F, N) :-
+	read_file_to_codes(F, M, []), init(M, Map), findall(_, make_loop(Map, _), X), length(X, N).
