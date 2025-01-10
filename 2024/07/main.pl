@@ -46,13 +46,20 @@ oper2(A, 0, 0, Acc, Y) :- Y is Acc + A.
 oper2(0, B, 0, Acc, Y) :- Y is Acc * B.
 oper2(0, 0, C, Acc, Y) :- combine(Acc, C, Y).
 
+coefs(0, []).
+coefs(N, [[1, 0, 0]|T2]) :- N > 0, N0 is N - 1, coefs(N0, T2).
+coefs(N, [[0, 1, 0]|T2]) :- N > 0, N0 is N - 1, coefs(N0, T2).
+coefs(N, [[0, 0, 1]|T2]) :- N > 0, N0 is N - 1, coefs(N0, T2).
+
+mask([], [], [], [], []).
+mask([X|Xs], [[1, 0, 0]|T0], [X|Ta], [0|Tb], [0|Tc]) :- mask(Xs, T0, Ta, Tb, Tc).
+mask([X|Xs], [[0, 1, 0]|T0], [0|Ta], [X|Tb], [0|Tc]) :- mask(Xs, T0, Ta, Tb, Tc).
+mask([X|Xs], [[0, 0, 1]|T0], [0|Ta], [0|Tb], [X|Tc]) :- mask(Xs, T0, Ta, Tb, Tc).
+
 repair2(eq(Y, [X0|Xs]), A, B, C) :-
-	length(Xs, N), ones_zeros(N, A), ones_zeros(N, B), ones_zeros(N, C),
-	add(A, B, C0), add(C, C0, C1), all(C1), ones_zeros(N, C1),
-	mask(A, Xs, AX), mask(B, Xs, BX), mask(C, Xs, CX),
-	foldl(oper2, AX, BX, CX, X0, Y).
+	length(Xs, N), coefs(N, Alpha), mask(Xs, Alpha, A, B, C), foldl(oper2, A, B, C, X0, Y).
 
 repair2(E) :- repair2(E, _, _, _).
 
-bridge_repair2(F, N) :-
+bridge_repair_2(F, N) :-
 	phrase_from_file(eqs(Es), F), include(repair2, Es, Evs), sum_eqs(Evs, 0, N).
