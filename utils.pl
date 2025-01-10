@@ -81,3 +81,5 @@ add([H0|T0], [H1|T1], [H2|T2]) :- H2 is H0 + H1, add(T0, T1, T2).
 
 mul([], [], []).
 mul([H0|T0], [H1|T1], [H2|T2]) :- H2 is H0 * H1, mul(T0, T1, T2).
+
+dot(A, B, X) :- mul(A, B, X0), sum_list(X0, X).
